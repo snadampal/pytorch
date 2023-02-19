@@ -1425,7 +1425,8 @@ static void addmm_impl_cpu_(
         // it is faster to call oneDNN matrix multiplication primitive with RHS*LHS
         // that will call then into ACL GEMM kernel and also additionally have support
         // for running kernel with BF16 instructions
-        if(transpose_a && !transpose_b && result.scalar_type() == at::ScalarType::Float) {
+	// ACL heuristic: matrices with LHS(in this case it is RHS) rows multiples of 8 have shown better perf with ACL
+        if(transpose_a && !transpose_b && !(b.sizes()[0] % 8) && result.scalar_type() == at::ScalarType::Float) {
             mkldnn_matmul(b, a, c, beta.to<float>(), alpha.to<float>());
             return;
         }
@@ -1662,7 +1663,12 @@ static inline void bmm_out_or_baddbmm_(const Tensor& self_or_result_, const Tens
             || (strides[1] == 1 && strides[2] >= sizes[1]);
   };
 
+#ifdef __aarch64__
+  // ACL heuristic: matrices with LHS rows multiples of 8 have shown better perf with ACL
+  if (!(res_rows % 8) && use_mkldnn_bf16_matmul(batch1, batch2, self_or_result)){
+#else
   if (use_mkldnn_bf16_matmul(batch1, batch2, self_or_result)){
+#endif
     mkldnn_matmul(batch1, batch2, self_or_result, beta.to<float>(), alpha.to<float>());
     return;
   }
