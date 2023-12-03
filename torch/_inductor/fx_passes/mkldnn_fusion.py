@@ -823,10 +823,10 @@ if torch._C._has_mkldnn:
         batch_size = input_meta_value.shape[0]
         is_bf16_weight = weight_meta_value.dtype == torch.bfloat16
         # for fp32, mkl should be enabled and batch_size should not be a free symbol.
-        if not is_bf16_weight and (
-            (not torch._C.has_mkl) or has_free_symbols(batch_size)
-        ):
-            return False
+        #Sunita: if not is_bf16_weight and (
+        #    (not torch._C.has_mkl) or has_free_symbols(batch_size)
+        #):
+         #   return False
         for meta_value in [input_meta_value, weight_meta_value]:
             if (
                 meta_value is None
@@ -850,6 +850,7 @@ if torch._C._has_mkldnn:
         ):
             if not mkldnn._is_mkldnn_bf16_supported():
                 return False
+
         return True
 
     _aten_conv_args = (
@@ -1011,14 +1012,16 @@ if torch._C._has_mkldnn:
                 packed_weight_op = (
                     mkldnn._reorder_linear_weight
                     if is_bf16_weight
-                    else torch.ops.mkl._mkl_reorder_linear_weight
+                    #else torch.ops.mkl._mkl_reorder_linear_weight
+                    else mkldnn._reorder_linear_weight
                 )
                 packed_weight_node = graph.create_node(
                     "call_function", packed_weight_op, args=packed_weight_inputs
                 )
 
                 packed_linear_inputs: Tuple[Any, ...] = (input, packed_weight_node)
-                if is_bf16_weight:
+                #if is_bf16_weight:
+                if (1):
                     packed_linear_inputs += (bias, "none", [], "")
                     packed_linear_op = mkldnn._linear_pointwise.default
                 else:

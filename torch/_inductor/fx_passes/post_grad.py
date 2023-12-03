@@ -119,7 +119,7 @@ def lazy_init():
     if torch._C._has_mkldnn:
         from .mkldnn_fusion import _mkldnn_fusion_init
 
-        _mkldnn_fusion_init()
+        #_mkldnn_fusion_init()
 
 
 def reorder_for_locality(graph: torch.fx.Graph):
