@@ -92,6 +92,72 @@ class MkldnnConvOpContext final : public ConvOpContext {
       const ideep::attr_t& attr);
 };
 
+using SerializationTypeMatMulPrePack = std::tuple<
+    Tensor,
+    c10::optional<Tensor>,
+    std::vector<int64_t>,
+    std::vector<int64_t>,
+    std::vector<int64_t>,
+    std::string>;
+
+class MatMulOpContext : public torch::jit::CustomClassHolder {
+ protected:
+  Tensor orig_weight_;
+  c10::optional<Tensor> orig_bias_;
+  std::vector<int64_t> stride_;
+  std::vector<int64_t> padding_;
+  std::vector<int64_t> input_size_;
+  std::string attr_;
+
+ public:
+  SerializationTypeMatMulPrePack unpack() {
+    return std::make_tuple(
+        orig_weight_,
+        orig_bias_,
+        stride_,
+        padding_,
+        input_size_,
+        attr_);
+  }
+
+  virtual Tensor run(const Tensor& input) = 0;
+  virtual void run(const Tensor& input, void* output) = 0;
+};
+
+
+class MkldnnMatMulOpContext final : public MatMulOpContext {
+ private:
+  ContextMatMul op_context_;
+
+ public:
+  MkldnnMatMulOpContext(
+      Tensor&& weight,
+      c10::optional<Tensor>&& bias,
+      std::vector<int64_t>&& padding,
+      std::vector<int64_t>&& stride,
+      std::vector<int64_t>&& input_size,
+      ContextMatMul&& op_context)
+      : op_context_(std::move(op_context)) {
+    orig_weight_ = std::move(weight);
+    orig_bias_ = std::move(bias);
+    padding_ = std::move(padding);
+    stride_ = std::move(stride);
+    input_size_ = std::move(input_size);
+  }
+
+  Tensor run(const Tensor& input) override;
+
+  void run(const Tensor& input, void* output) override;
+
+  static c10::intrusive_ptr<MatMulOpContext> create_context(
+      Tensor&& weight,
+      c10::optional<Tensor>&& bias,
+      std::vector<int64_t>&& padding,
+      std::vector<int64_t>&& stride,
+      std::vector<int64_t>&& input_size,
+      const ideep::attr_t& attr);
+};
+
 } // namespace mkldnn
 } // namespace native
 } // namespace at

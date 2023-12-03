@@ -39,6 +39,28 @@ struct ContextConv final {
         attr_(attr) {}
 };
 
+struct ContextMatMul final {
+  ideep::tensor weight_packed_;
+  c10::optional<at::Tensor> at_bias_;
+  std::vector<int64_t> padding_;
+  std::vector<int64_t> stride_;
+  ideep::attr_t attr_;
+
+  ContextMatMul() = delete;
+
+  ContextMatMul(
+      ideep::tensor&& weight_packed,
+      c10::optional<at::Tensor> at_bias,
+      std::vector<int64_t> padding,
+      std::vector<int64_t> stride,
+      ideep::attr_t attr)
+      : weight_packed_(std::move(weight_packed)),
+        at_bias_(std::move(at_bias)),
+        padding_(padding),
+        stride_(stride),
+        attr_(attr) {}
+};
+
 } // namespace mkldnn
 } // namespace native
 } // namespace at
