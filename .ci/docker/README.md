@@ -20,6 +20,7 @@ See `build.sh` for valid build environments (it's the giant switch).
 * `ubuntu-cuda` -- Dockerfile for Ubuntu image with CUDA support for nvidia-docker
 * `ubuntu-rocm` -- Dockerfile for Ubuntu image with ROCm support
 * `ubuntu-xpu` -- Dockerfile for Ubuntu image with XPU support
+* `ubuntu-aarch64` -- Dockerfile for Ubuntu image for aarch64 CPU builds and test jobs
 
 ## Usage
 

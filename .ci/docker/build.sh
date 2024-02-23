@@ -79,6 +79,8 @@ elif [[ "$image" == *cuda*linter* ]]; then
 elif [[ "$image" == *linter* ]]; then
   # Use a separate Dockerfile for linter to keep a small image size
   DOCKERFILE="linter/Dockerfile"
+elif [[ "$image" == *aarch64* ]]; then
+  DOCKERFILE="${OS}-aarch64/Dockerfile"
 fi
 
 # CMake 3.18 is needed to support CUDA17 language variant
@@ -295,6 +297,14 @@ case "$image" in
   pytorch-linux-jammy-cuda11.8-cudnn8-py3.9-linter)
     ANACONDA_PYTHON_VERSION=3.9
     CUDA_VERSION=11.8
+    CONDA_CMAKE=yes
+    ;;
+  pytorch-linux-jammy-aarch64-py3.8-gcc11)
+    ANACONDA_PYTHON_VERSION=3.8
+    GCC_VERSION=11
+    PROTOBUF=yes
+    DB=yes
+    VISION=yes
     CONDA_CMAKE=yes
     ;;
   *)

@@ -11,10 +11,10 @@ if [ -n "$ANACONDA_PYTHON_VERSION" ]; then
 
   case "$MAJOR_PYTHON_VERSION" in
     2)
-      CONDA_FILE="Miniconda2-latest-Linux-x86_64.sh"
+      CONDA_FILE="Miniconda2-latest-Linux-aarch64.sh"
     ;;
     3)
-      CONDA_FILE="Miniconda3-latest-Linux-x86_64.sh"
+      CONDA_FILE="Miniconda3-latest-Linux-aarch64.sh"
     ;;
     *)
       echo "Unsupported ANACONDA_PYTHON_VERSION: $ANACONDA_PYTHON_VERSION"
@@ -51,7 +51,7 @@ if [ -n "$ANACONDA_PYTHON_VERSION" ]; then
   as_jenkins conda create -n py_$ANACONDA_PYTHON_VERSION -y python="$ANACONDA_PYTHON_VERSION"
 
   # Install PyTorch conda deps, as per https://github.com/pytorch/pytorch README
-  CONDA_COMMON_DEPS="astunparse pyyaml mkl=2021.4.0 mkl-include=2021.4.0 setuptools"
+  CONDA_COMMON_DEPS="astunparse pyyaml setuptools"
   if [ "$ANACONDA_PYTHON_VERSION" = "3.11" ]; then
     conda_install numpy=1.23.5 ${CONDA_COMMON_DEPS}
   else
@@ -60,7 +60,7 @@ if [ -n "$ANACONDA_PYTHON_VERSION" ]; then
 
   # Install llvm-8 as it is required to compile llvmlite-0.30.0 from source
   # and libpython-static for torch deploy
-  conda_install llvmdev=8.0.0 "libpython-static=${ANACONDA_PYTHON_VERSION}"
+#  conda_install llvmdev=8.0.0 "libpython-static=${ANACONDA_PYTHON_VERSION}"
 
   # Use conda cmake in some cases. Conda cmake will be newer than our supported
   # min version (3.5 for xenial and 3.10 for bionic), so we only do it in those
@@ -77,7 +77,7 @@ if [ -n "$ANACONDA_PYTHON_VERSION" ]; then
   fi
 
   # Install some other packages, including those needed for Python test reporting
-  pip_install -r /opt/conda/requirements-ci.txt
+  #pip_install -r /opt/conda/requirements-ci.txt
 
   pip_install -U scikit-learn
 
