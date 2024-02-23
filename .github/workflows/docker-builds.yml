@@ -41,7 +41,7 @@ jobs:
         include:
           - docker-image-name: pytorch-linux-jammy-aarch64-py3.8-gcc11
     env:
-      DOCKER_IMAGE_BASE: 308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${{ matrix.docker-image-name }}
+      DOCKER_IMAGE_BASE: 339712882378.dkr.ecr.us-east-1.amazonaws.com/pytorch/${{ matrix.docker-image-name }}
     steps:
       - name: Clean workspace
         shell: bash
@@ -62,6 +62,7 @@ jobs:
         id: build-docker-image
         uses: pytorch/test-infra/.github/actions/calculate-docker-image@main
         with:
+          docker-registry: 339712882378.dkr.ecr.us-east-1.amazonaws.com
           docker-image-name: ${{ matrix.docker-image-name }}
           always-rebuild: true
           push: true
@@ -69,6 +70,7 @@ jobs:
       - name: Pull docker image
         uses: pytorch/test-infra/.github/actions/pull-docker-image@main
         with:
+          docker-registry: 339712882378.dkr.ecr.us-east-1.amazonaws.com
           docker-image: ${{ steps.build-docker-image.outputs.docker-image }}
 
       - uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
