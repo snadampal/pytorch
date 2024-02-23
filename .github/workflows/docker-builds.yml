@@ -9,7 +9,6 @@ on:
       - .lintrunner.toml
   push:
     branches:
-      - ci_gv3
       - main
       - release/*
       - landchecks/*
