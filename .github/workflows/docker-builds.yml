@@ -94,9 +94,9 @@ jobs:
             docker tag "${ECR_DOCKER_IMAGE}" "${ghcr_image}:${IMAGE_NAME}-${tag}"
             docker push "${ghcr_image}:${IMAGE_NAME}-${tag}"
 
-      - name: Chown workspace
-        uses: ./.github/actions/chown-workspace
-        if: always()
+      #- name: Chown workspace
+      #  uses: ./.github/actions/chown-workspace
+      #  if: always()
 
       - name: Teardown Linux
         uses: pytorch/test-infra/.github/actions/teardown-linux@main
