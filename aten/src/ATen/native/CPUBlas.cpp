@@ -166,7 +166,9 @@ void gemm(
   internal::normalize_last_dims(transa, transb, m, n, k, &lda, &ldb, &ldc);
 #if AT_MKLDNN_ENABLED()
    if (mkldnn_bf32_gemm(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc)) {
-     return;
+      
+std::cout << "MKLDNN ENABLED..." << std::endl;
+      return;
    }
 #endif
 #if AT_BUILD_WITH_BLAS()
