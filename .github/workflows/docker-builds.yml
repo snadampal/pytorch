@@ -62,7 +62,7 @@ jobs:
             runner: linux.arm64.2xlarge
     runs-on: [self-hosted, "${{ matrix.runner }}"]
     env:
-      DOCKER_IMAGE_BASE: 308535385114.dkr.ecr.us-east-1.amazonaws.com/pytorch/${{ matrix.docker-image-name }}
+      DOCKER_IMAGE_BASE: 339712882378.dkr.ecr.us-east-1.amazonaws.com/pytorch/${{ matrix.docker-image-name }}
     steps:
       - name: Clean workspace
         shell: bash
@@ -113,11 +113,11 @@ jobs:
             docker tag "${ECR_DOCKER_IMAGE}" "${ghcr_image}:${IMAGE_NAME}-${tag}"
             docker push "${ghcr_image}:${IMAGE_NAME}-${tag}"
 
-      - name: Chown workspace
-        uses: ./.github/actions/chown-workspace
-        with:
-          ALPINE_IMAGE: 308535385114.dkr.ecr.us-east-1.amazonaws.com/${{ (matrix.runner == 'linux.arm64.2xlarge') && 'arm64v8' || 'tool' }}/alpine
-        if: always()
+      #- name: Chown workspace
+      #  uses: ./.github/actions/chown-workspace
+      #  with:
+      #    ALPINE_IMAGE: 308535385114.dkr.ecr.us-east-1.amazonaws.com/${{ (matrix.runner == 'linux.arm64.2xlarge') && 'arm64v8' || 'tool' }}/alpine
+      #  if: always()
 
       - name: Teardown Linux
         uses: pytorch/test-infra/.github/actions/teardown-linux@main
