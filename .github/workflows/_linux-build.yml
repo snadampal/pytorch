@@ -127,12 +127,12 @@ jobs:
           test-matrix: ${{ inputs.test-matrix }}
           job-name: ${{ steps.get-job-id.outputs.job-name }}
 
-      - name: Download pytest cache
-        uses: ./.github/actions/pytest-cache-download
-        continue-on-error: true
-        with:
-          cache_dir: .pytest_cache
-          job_identifier: ${{ github.workflow }}_${{ inputs.build-environment }}
+      #- name: Download pytest cache
+      #  uses: ./.github/actions/pytest-cache-download
+      #  continue-on-error: true
+      #  with:
+      #    cache_dir: .pytest_cache
+      #    job_identifier: ${{ github.workflow }}_${{ inputs.build-environment }}
 
       - name: Build
         if: steps.filter.outputs.is-test-matrix-empty == 'False' || inputs.test-matrix == ''
@@ -189,24 +189,24 @@ jobs:
         run: |
           zip -1 -r artifacts.zip dist/ build/custom_test_artifacts build/lib build/bin .additional_ci_files
 
-      - name: Store PyTorch Build Artifacts on S3
-        uses: seemethere/upload-artifact-s3@v5
-        if: inputs.build-generates-artifacts && steps.build.outcome != 'skipped'
-        with:
-          name: ${{ inputs.build-environment }}
-          retention-days: 14
-          if-no-files-found: error
-          path: artifacts.zip
+      #- name: Store PyTorch Build Artifacts on S3
+      #  uses: seemethere/upload-artifact-s3@v5
+      #  if: inputs.build-generates-artifacts && steps.build.outcome != 'skipped'
+      #  with:
+      #    name: ${{ inputs.build-environment }}
+      #    retention-days: 14
+      #    if-no-files-found: error
+      #    path: artifacts.zip
 
-      - name: Upload sccache stats
-        if: steps.build.outcome != 'skipped'
-        uses: seemethere/upload-artifact-s3@v5
-        with:
-          s3-prefix: |
-            ${{ github.repository }}/${{ github.run_id }}/${{ github.run_attempt }}/artifact
-          retention-days: 365
-          if-no-files-found: warn
-          path: sccache-stats-*.json
+      #- name: Upload sccache stats
+      #  if: steps.build.outcome != 'skipped'
+      #  uses: seemethere/upload-artifact-s3@v5
+      #  with:
+      #    s3-prefix: |
+      #       ${{ github.repository }}/${{ github.run_id }}/${{ github.run_attempt }}/artifact
+      #    retention-days: 365
+      #    if-no-files-found: warn
+      #    path: sccache-stats-*.json
 
       - name: Teardown Linux
         uses: pytorch/test-infra/.github/actions/teardown-linux@main
