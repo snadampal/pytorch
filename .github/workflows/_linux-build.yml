@@ -195,7 +195,7 @@ jobs:
 
       - name: Test
         id: test
-        timeout-minutes: 60
+        timeout-minutes: 360
         env:
           BUILD_ENVIRONMENT: ${{ inputs.build-environment }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

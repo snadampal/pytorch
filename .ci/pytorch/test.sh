@@ -244,7 +244,7 @@ elif [[ $TEST_CONFIG == 'nogpu_AVX512' ]]; then
 fi
 
 test_python_legacy_jit() {
-  time python test/run_test.py --include test_jit_legacy test_jit_fuser_legacy --verbose
+  time python test/run_test.py --include test_jit_legacy test_jit_fuser_legacy --verbose --keep-going
   assert_git_not_dirty
 }
 
@@ -256,14 +256,14 @@ test_python_shard() {
 
   # Bare --include flag is not supported and quoting for lint ends up with flag not being interpreted correctly
   # shellcheck disable=SC2086
-  time python test/run_test.py --exclude-jit-executor --exclude-distributed-tests $INCLUDE_CLAUSE --shard "$1" "$NUM_TEST_SHARDS" --verbose $PYTHON_TEST_EXTRA_OPTION
+  time python test/run_test.py --keep-going --exclude-jit-executor --exclude-distributed-tests $INCLUDE_CLAUSE --shard "$1" "$NUM_TEST_SHARDS" --verbose $PYTHON_TEST_EXTRA_OPTION
 
   assert_git_not_dirty
 }
 
 test_python() {
   # shellcheck disable=SC2086
-  time python test/run_test.py --exclude-jit-executor --exclude-distributed-tests $INCLUDE_CLAUSE --verbose $PYTHON_TEST_EXTRA_OPTION
+  time python test/run_test.py --keep-going --exclude-jit-executor --exclude-distributed-tests $INCLUDE_CLAUSE --verbose $PYTHON_TEST_EXTRA_OPTION
   assert_git_not_dirty
 }
 
@@ -282,7 +282,7 @@ test_dynamo_shard() {
     --exclude-distributed-tests \
     --exclude-torch-export-tests \
     --shard "$1" "$NUM_TEST_SHARDS" \
-    --verbose
+    --verbose --keep-going
   assert_git_not_dirty
 }
 
@@ -305,21 +305,21 @@ test_inductor_distributed() {
 
   # this runs on both single-gpu and multi-gpu instance. It should be smart about skipping tests that aren't supported
   # with if required # gpus aren't available
-  python test/run_test.py --include distributed/test_dynamo_distributed distributed/test_inductor_collectives --verbose
+  python test/run_test.py --keep-going --include distributed/test_dynamo_distributed distributed/test_inductor_collectives --verbose
   assert_git_not_dirty
 }
 
 test_inductor() {
   python tools/dynamo/verify_dynamo.py
-  python test/run_test.py --inductor --include test_modules test_ops test_ops_gradients test_torch --verbose
+  python test/run_test.py --keep-going --inductor --include test_modules test_ops test_ops_gradients test_torch --verbose
   # Do not add --inductor for the following inductor unit tests, otherwise we will fail because of nested dynamo state
-  python test/run_test.py --include inductor/test_torchinductor inductor/test_torchinductor_opinfo --verbose
+  python test/run_test.py --keep-going --include inductor/test_torchinductor inductor/test_torchinductor_opinfo --verbose
 
   # docker build uses bdist_wheel which does not work with test_aot_inductor
   # TODO: need a faster way to build
   if [[ "$BUILD_ENVIRONMENT" != *rocm* ]]; then
       BUILD_AOT_INDUCTOR_TEST=1 python setup.py develop
-      CPP_TESTS_DIR="${BUILD_BIN_DIR}" LD_LIBRARY_PATH="${TORCH_LIB_DIR}" python test/run_test.py --cpp --verbose -i cpp/test_aot_inductor
+      CPP_TESTS_DIR="${BUILD_BIN_DIR}" LD_LIBRARY_PATH="${TORCH_LIB_DIR}" python test/run_test.py --keep-going --cpp --verbose -i cpp/test_aot_inductor
   fi
 }
 
@@ -327,8 +327,8 @@ test_inductor_cpp_wrapper_abi_compatible() {
   export TORCHINDUCTOR_ABI_COMPATIBLE=1
   echo "Testing Inductor cpp wrapper mode with TORCHINDUCTOR_ABI_COMPATIBLE=1"
   # cpu stack allocation causes segfault and needs more investigation
-  TORCHINDUCTOR_STACK_ALLOCATION=0 python test/run_test.py --include inductor/test_cpu_cpp_wrapper
-  python test/run_test.py --include inductor/test_cuda_cpp_wrapper
+  TORCHINDUCTOR_STACK_ALLOCATION=0 python test/run_test.py --keep-going --include inductor/test_cpu_cpp_wrapper
+  python test/run_test.py --keep-going --include inductor/test_cuda_cpp_wrapper
 }
 
 # "Global" flags for inductor benchmarking controlled by TEST_CONFIG
@@ -703,10 +703,10 @@ test_libtorch_jit() {
 
   # Run jit and lazy tensor cpp tests together to finish them faster
   if [[ "$BUILD_ENVIRONMENT" == *cuda* && "$TEST_CONFIG" != *nogpu* ]]; then
-    LTC_TS_CUDA=1 python test/run_test.py --cpp --verbose -i cpp/test_jit cpp/test_lazy
+    LTC_TS_CUDA=1 python test/run_test.py --keep-going --cpp --verbose -i cpp/test_jit cpp/test_lazy
   else
     # CUDA tests have already been skipped when CUDA is not available
-    python test/run_test.py --cpp --verbose -i cpp/test_jit cpp/test_lazy -k "not CUDA"
+    python test/run_test.py --keep-going --cpp --verbose -i cpp/test_jit cpp/test_lazy -k "not CUDA"
   fi
 
   # Cleaning up test artifacts in the test folder
@@ -728,14 +728,14 @@ test_libtorch_api() {
     "$TORCH_BIN_DIR"/test_tensorexpr --gtest_output=xml:$TEST_REPORTS_DIR/test_tensorexpr.xml
   else
     # Exclude IMethodTest that relies on torch::deploy, which will instead be ran in test_deploy
-    OMP_NUM_THREADS=2 TORCH_CPP_TEST_MNIST_PATH="${MNIST_DIR}" python test/run_test.py --cpp --verbose -i cpp/test_api -k "not IMethodTest"
-    python test/run_test.py --cpp --verbose -i cpp/test_tensorexpr
+    OMP_NUM_THREADS=2 TORCH_CPP_TEST_MNIST_PATH="${MNIST_DIR}" python test/run_test.py --keep-going --cpp --verbose -i cpp/test_api -k "not IMethodTest"
+    python test/run_test.py --keep-going --cpp --verbose -i cpp/test_tensorexpr
   fi
 
   if [[ "${BUILD_ENVIRONMENT}" != *android* && "${BUILD_ENVIRONMENT}" != *cuda* && "${BUILD_ENVIRONMENT}" != *asan* ]]; then
     # NB: This test is not under TORCH_BIN_DIR but under BUILD_BIN_DIR
     export CPP_TESTS_DIR="${BUILD_BIN_DIR}"
-    python test/run_test.py --cpp --verbose -i cpp/static_runtime_test
+    python test/run_test.py --keep-going --cpp --verbose -i cpp/static_runtime_test
   fi
 }
 
@@ -758,7 +758,7 @@ test_aot_compilation() {
   ln -sf "$TORCH_LIB_DIR"/libtorch* "$TORCH_BIN_DIR"
 
   if [ -f "$TORCH_BIN_DIR"/test_mobile_nnc ]; then
-    CPP_TESTS_DIR="${TORCH_BIN_DIR}" python test/run_test.py --cpp --verbose -i cpp/test_mobile_nnc
+    CPP_TESTS_DIR="${TORCH_BIN_DIR}" python test/run_test.py --keep-going --cpp --verbose -i cpp/test_mobile_nnc
   fi
 
   if [ -f "$TORCH_BIN_DIR"/aot_model_compiler_test ]; then
@@ -771,14 +771,14 @@ test_vulkan() {
     ln -sf "$TORCH_LIB_DIR"/libtorch* "$TORCH_TEST_DIR"
     ln -sf "$TORCH_LIB_DIR"/libc10* "$TORCH_TEST_DIR"
     export VK_ICD_FILENAMES=/var/lib/jenkins/swiftshader/swiftshader/build/Linux/vk_swiftshader_icd.json
-    CPP_TESTS_DIR="${TORCH_TEST_DIR}" LD_LIBRARY_PATH=/var/lib/jenkins/swiftshader/swiftshader/build/Linux/ python test/run_test.py --cpp --verbose -i cpp/vulkan_api_test
+    CPP_TESTS_DIR="${TORCH_TEST_DIR}" LD_LIBRARY_PATH=/var/lib/jenkins/swiftshader/swiftshader/build/Linux/ python test/run_test.py --keep-going --cpp --verbose -i cpp/vulkan_api_test
   fi
 }
 
 test_distributed() {
   echo "Testing distributed python tests"
   # shellcheck disable=SC2086
-  time python test/run_test.py --distributed-tests --shard "$SHARD_NUMBER" "$NUM_TEST_SHARDS" $INCLUDE_CLAUSE --verbose
+  time python test/run_test.py --keep-going --distributed-tests --shard "$SHARD_NUMBER" "$NUM_TEST_SHARDS" $INCLUDE_CLAUSE --verbose
   assert_git_not_dirty
 
   if [[ ("$BUILD_ENVIRONMENT" == *cuda* || "$BUILD_ENVIRONMENT" == *rocm*) && "$SHARD_NUMBER" == 1 ]]; then
@@ -789,9 +789,9 @@ test_distributed() {
     export CPP_TESTS_DIR="${TORCH_BIN_DIR}"
     # These are distributed tests, so let's continue running them sequentially here to avoid
     # any surprise
-    python test/run_test.py --cpp --verbose -i cpp/FileStoreTest
-    python test/run_test.py --cpp --verbose -i cpp/HashStoreTest
-    python test/run_test.py --cpp --verbose -i cpp/TCPStoreTest
+    python test/run_test.py --keep-going --cpp --verbose -i cpp/FileStoreTest
+    python test/run_test.py --keep-going --cpp --verbose -i cpp/HashStoreTest
+    python test/run_test.py --keep-going --cpp --verbose -i cpp/TCPStoreTest
 
     if [[ "$BUILD_ENVIRONMENT" == *cuda* ]]; then
       MPIEXEC=$(command -v mpiexec)
@@ -801,9 +801,9 @@ test_distributed() {
         eval "$MPICMD"
       fi
 
-      python test/run_test.py --cpp --verbose -i cpp/ProcessGroupGlooTest
-      python test/run_test.py --cpp --verbose -i cpp/ProcessGroupNCCLTest
-      python test/run_test.py --cpp --verbose -i cpp/ProcessGroupNCCLErrorsTest
+      python test/run_test.py --keep-going --cpp --verbose -i cpp/ProcessGroupGlooTest
+      python test/run_test.py --keep-going --cpp --verbose -i cpp/ProcessGroupNCCLTest
+      python test/run_test.py --keep-going --cpp --verbose -i cpp/ProcessGroupNCCLErrorsTest
     fi
   fi
 }
@@ -816,7 +816,7 @@ test_rpc() {
   ln -sf "$TORCH_LIB_DIR"/libc10* "$TORCH_BIN_DIR"
   ln -sf "$TORCH_LIB_DIR"/libtbb* "$TORCH_BIN_DIR"
 
-  CPP_TESTS_DIR="${TORCH_BIN_DIR}" python test/run_test.py --cpp --verbose -i cpp/test_cpp_rpc
+  CPP_TESTS_DIR="${TORCH_BIN_DIR}" python test/run_test.py --keep-going --cpp --verbose -i cpp/test_cpp_rpc
 }
 
 test_custom_backend() {
@@ -1063,7 +1063,7 @@ test_benchmarks() {
 
 test_cpp_extensions() {
   # This is to test whether cpp extension build is compatible with current env. No need to test both ninja and no-ninja build
-  time python test/run_test.py --include test_cpp_extensions_aot_ninja --verbose
+  time python test/run_test.py --keep-going --include test_cpp_extensions_aot_ninja --verbose
   assert_git_not_dirty
 }
 
