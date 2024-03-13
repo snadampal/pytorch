@@ -195,7 +195,7 @@ jobs:
 
       - name: Test
         id: test
-        timeout-minutes: ${{ fromJson(steps.test-timeout.outputs.timeout) }}
+        timeout-minutes: 60
         env:
           BUILD_ENVIRONMENT: ${{ inputs.build-environment }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
