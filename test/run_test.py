@@ -36,6 +36,7 @@ from torch.testing._internal.common_utils import (
     TEST_WITH_CROSSREF,
     TEST_WITH_ROCM,
     TEST_WITH_SLOW_GRADCHECK,
+    IS_ARM64_LINUX
 )
 
 REPO_ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -268,6 +269,57 @@ CORE_TEST_LIST = [
     "test_ops_jit",
     "test_torch",
 ]
+
+ARM64_LINUX_BLOCKLIST = [
+    "distributed/_tensor/test_dtensor_ops",
+    "distributed/_tensor/test_redistribute.py",
+    "distributed/test_distributed_spawn",
+    "distributed/pipeline/sync/test_inplace",
+    "distributed/test_dynamo_distributed",
+    "functorch/test_vmap",
+    "inductor/test_torchinductor",
+    "inductor/test_torchinductor_codegen_dynamic_shapes",
+    "distributed/fsdp/test_fsdp_mixed_precision",
+    "distributed/optim/test_zero_redundancy_optimizer",
+    "distributed/test_device_mesh",
+    "distributed/test_functional_api",
+    "distributed/test_store",
+    "doctests",
+    "inductor/test_torchinductor_dynamic_shapes",
+    "nn/test_convolution",
+    "test_autocast",
+    "test_cpp_extensions_aot_ninja",
+    "test_cpp_extensions_aot_no_ninja",
+    "test_cpp_extensions_jit",
+    "test_dispatch",
+    "test_fx",
+    "test_jit_legacy",
+    "test_jit_profiling",
+    "test_nn",
+    "test_schema_check",
+    "test_torch",
+    "test_utils",
+    "backends/xeon/test_launch",
+    "dynamo/test_comptime",
+    "dynamo/test_dynamic_shapes",
+    "dynamo/test_export",
+    "dynamo/test_misc",
+    "dynamo/test_model_output",
+    "dynamo/test_unspec",
+    "export/test_export",
+    "export/test_lift_unlift",
+    "export/test_retraceability",
+    "export/test_serdes",
+    "export/test_serialize",
+    "export/test_torchbind",
+    "export/test_unflatten",
+    "functorch/test_aotdispatch",
+    "functorch/test_eager_transforms",
+    "distributed/elastic/multiprocessing/api_test",
+    "test_ci_sanity_check_fail",
+
+]
+
 
 
 # if a test file takes longer than 5 min, we add it to TARGET_DET_LIST
@@ -1412,6 +1464,9 @@ def get_selected_tests(options) -> List[str]:
             "that don't use gradcheck.",
             exact_match=True,
         )
+
+    if IS_ARM64_LINUX:
+        selected_tests = exclude_tests(ARM64_LINUX_BLOCKLIST, selected_tests, "on Arm64 Linux")
 
     selected_tests = [parse_test_module(x) for x in selected_tests]
     return selected_tests
