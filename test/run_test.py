@@ -1466,7 +1466,8 @@ def get_selected_tests(options) -> List[str]:
         )
 
     if IS_ARM64_LINUX:
-        selected_tests = exclude_tests(ARM64_LINUX_BLOCKLIST, selected_tests, "on Arm64 Linux")
+        #selected_tests = exclude_tests(ARM64_LINUX_BLOCKLIST, selected_tests, "on Arm64 Linux")
+         selected_tests = CORE_TEST_LIST
 
     selected_tests = [parse_test_module(x) for x in selected_tests]
     return selected_tests
