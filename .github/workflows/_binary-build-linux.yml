@@ -187,9 +187,9 @@ jobs:
       - name: Checkout pytorch/builder to builder dir
         uses: malfet/checkout@silent-checkout
         with:
-          ref: main
+          ref: openmp_update1
           submodules: recursive
-          repository: pytorch/builder
+          repository: snadampal/builder
           path: builder
           quiet-checkout: true
 
