@@ -63,7 +63,7 @@ In foo.cc, do:
 #pragma once
 
 #if defined(CAFFE2_PERF_WITH_AVX512) || defined(CAFFE2_PERF_WITH_AVX2) \
-     || defined(CAFFE2_PERF_WITH_AVX)
+     || defined(CAFFE2_PERF_WITH_AVX) || defined(CAFFE2_PERF_WITH_NEON)
 #include <cpuinfo.h>
 #endif
 
@@ -127,3 +127,16 @@ In foo.cc, do:
 #define AVX_DO(funcname, ...)
 #define AVX_F16C_DO(funcname, ...)
 #endif // CAFFE2_PERF_WITH_AVX
+
+#ifdef CAFFE2_PERF_WITH_NEON
+#define NEON_FMA_DO(funcname, ...)                                             \
+  {                                                                            \
+    static const bool isDo = cpuinfo_initialize() && cpuinfo_has_arm_neon(); \
+    if (isDo) {                                                                \
+      return funcname##__neon_fma(__VA_ARGS__);                                \
+    }                                                                          \
+  }
+#else // CAFFE2_PERF_WITH_NEON
+#define NEON_DO(funcname, ...)
+#define NEON_FMA_DO(funcname, ...)
+#endif // CAFFE2_PERF_WITH_NEON

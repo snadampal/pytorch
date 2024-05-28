@@ -25,6 +25,7 @@
 #cmakedefine USE_MKLDNN
 #cmakedefine CAFFE2_USE_NVTX
 #cmakedefine CAFFE2_USE_ITT
+#cmakedefine CAFFE2_PERF_WITH_NEON
 
 #ifndef EIGEN_MPL2_ONLY
 #cmakedefine EIGEN_MPL2_ONLY
@@ -68,4 +69,5 @@
   {"USE_ITT", "${CAFFE2_USE_ITT}"}, \
   {"USE_ROCM_KERNEL_ASSERT", "${USE_ROCM_KERNEL_ASSERT}"}, \
   {"USE_CUSPARSELT", "${USE_CUSPARSELT}"}, \
+  {"PERF_WITH_NEON", "${CAFFE2_PERF_WITH_NEON}"}, \
 }

@@ -113,6 +113,9 @@ static bool EmbeddingLookupGenericSlowIdx(
   decltype(                                                                                           \
       EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL##__base)     \
       EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL##__avx2_fma; \
+  decltype(                                                                                           \
+      EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL##__base)     \
+      EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL##__neon_fma; \
   bool                                                                                                \
       EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL(             \
           const int64_t block_size,                                                                   \
@@ -132,6 +135,19 @@ static bool EmbeddingLookupGenericSlowIdx(
       CAFFE_ENFORCE(scale_bias == nullptr, "scale_bias must be nullptr");                             \
     }                                                                                                 \
     AVX2_FMA_DO(                                                                                      \
+        EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL,           \
+        block_size,                                                                                   \
+        output_size,                                                                                  \
+        index_size,                                                                                   \
+        data_size,                                                                                    \
+        input,                                                                                        \
+        indices,                                                                                      \
+        offsets,                                                                                      \
+        weights,                                                                                      \
+        scale_bias,                                                                                   \
+        normalize_by_lengths,                                                                         \
+        out);                                                                                         \
+    NEON_FMA_DO(                                                                                          \
         EmbeddingLookupIdx_##IndexType##_##InTypeName##_##OutType##_##IS_WEIGHT_POSITIONAL,           \
         block_size,                                                                                   \
         output_size,                                                                                  \

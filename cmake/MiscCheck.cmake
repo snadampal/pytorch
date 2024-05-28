@@ -41,6 +41,7 @@ if(NOT INTERN_BUILD_MOBILE)
   endif()
 endif()
 # ---[ Check if the compiler has AVX512 support.
+set(CAFFE2_PERF_WITH_NEON 1)
 cmake_push_check_state(RESET)
 if(MSVC AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # We could've used MSVC's hidden option /arch:AVX512 that defines __AVX512F__,

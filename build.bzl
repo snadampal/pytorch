@@ -26,6 +26,7 @@ def define_targets(rules):
             "CAFFE2_USE_ITT",
             "USE_ROCM_KERNEL_ASSERT",
             "EIGEN_MPL2_ONLY",
+            "CAFFE2_PERF_WITH_NEON",
         ],
     )
 
