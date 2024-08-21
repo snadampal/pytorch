@@ -2,6 +2,8 @@ name: linux-aarch64
 
 on:
   push:
+    branches:
+      - ci_perf_debug
     tags:
       - ciflow/linux-aarch64/*
   workflow_dispatch:

@@ -95,8 +95,9 @@ on:
 jobs:
   build:
     # Don't run on forked repos
-    if: github.repository_owner == 'pytorch'
-    runs-on: ${{ inputs.runner_prefix}}${{ inputs.runner }}
+    #if: github.repository_owner == 'pytorch'
+    #runs-on: ${{ inputs.runner_prefix}}${{ inputs.runner }}
+    runs-on: self-hosted
     timeout-minutes: 240
     outputs:
       docker-image: ${{ steps.calculate-docker-image.outputs.docker-image }}
